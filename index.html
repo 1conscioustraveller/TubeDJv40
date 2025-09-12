@@ -199,17 +199,11 @@
         cursor: pointer;
         box-shadow: 0 0 8px #00e0ff, 0 0 14px rgba(0, 224, 255, 0.7);
       }
-      .searchload {
-        margin-top: 30px;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        text-align: center;
-      }
       .url-input-container {
         display: flex;
         flex-direction: row;
         align-items: center;
+        margin-top: 10px;
       }
       input[type="text"] {
         width: 150px;
@@ -218,7 +212,6 @@
         border: 1px solid #00bcd4;
         border-radius: 4px;
         color: white;
-        margin-bottom: 0px;
       }
       button {
         padding: 10px 10px;
@@ -229,6 +222,7 @@
         cursor: pointer;
         font-weight: bold;
         width: 28%;
+        margin-left: 1px;
       }
       button:hover {
         background: #00e0ff;
@@ -282,10 +276,6 @@
           width: 54px;
           height: 72px;
         }
-        .searchload {
-          grid-template-columns: 1fr;
-          gap: 15px;
-        }
         input[type="text"],
         button {
           width: 90%;
@@ -312,13 +302,14 @@
         }
         .url-input-container {
          flex-direction: column; /* Stack vertically on mobile */
-            gap: 5px; /* Add spacing between stacked elements */
+         gap: 5px;
+         margin-top: 10px;
         }
       }
     </style>
   </head>
   <body>
-    <div class="app-title">TubeDJ Mixer with Cue Points</div>
+    <div class="app-title">TubeDJ Mixer</div>
     <div id="root"></div>
 
     <script type="text/babel">
@@ -355,15 +346,11 @@
             });
           };
           
-          // Add keyboard event listener
           const handleKeyPress = (e) => {
-            // Cue point shortcuts
             if (e.key === 'q') setCuePoint('A', 0);
             if (e.key === 'w') setCuePoint('B', 0);
             if (e.key === 'e') setCuePoint('C', 0);
             if (e.key === 'r') setCuePoint('D', 0);
-            
-            // Jump to cue point shortcuts
             if (e.key === 'a') jumpToCuePoint('A', 0);
             if (e.key === 's') jumpToCuePoint('B', 0);
             if (e.key === 'd') jumpToCuePoint('C', 0);
@@ -371,19 +358,13 @@
           };
           
           window.addEventListener('keydown', handleKeyPress);
-          
-          return () => {
-            window.removeEventListener('keydown', handleKeyPress);
-          };
+          return () => window.removeEventListener('keydown', handleKeyPress);
         }, []);
 
-        // Set cue point
         const setCuePoint = (deck, index) => {
           const player = playersRef.current[deck];
           if (!player) return;
-          
           const currentTime = player.getCurrentTime();
-          
           setCuePoints(prev => {
             const newCuePoints = { ...prev };
             newCuePoints[deck][index] = currentTime;
@@ -391,7 +372,6 @@
           });
         };
         
-        // Clear cue point (right-click)
         const clearCuePoint = (deck, index) => {
           setCuePoints(prev => {
             const newCuePoints = { ...prev };
@@ -400,20 +380,16 @@
           });
         };
       
-        // Jump to cue point
         const jumpToCuePoint = (deck, index) => {
           const player = playersRef.current[deck];
           const cueTime = cuePoints[deck][index];
-          
           if (!player || cueTime === null) return;
-          
           player.seekTo(cueTime, true);
         };
 
         const applyVolumes = (xfade, currentVolumes) => {
           const leftFactor = 1 - xfade;
           const rightFactor = xfade;
-
           ["A", "B"].forEach((deck) => {
             const player = playersRef.current[deck];
             if (player) {
@@ -421,7 +397,6 @@
               player.setVolume((currentVolumes[deck] / 100) * leftFactor * 100);
             }
           });
-
           ["C", "D"].forEach((deck) => {
             const player = playersRef.current[deck];
             if (player) {
@@ -489,10 +464,10 @@
                         <button
                           key={index}
                           className={`cue-button ${cuePoints[deck][index] !== null ? 'active' : ''}`}
-                          onDoubleClick={() => setCuePoint(deck, index)}   // double-click = set cue
-                          onClick={() => jumpToCuePoint(deck, index)}      // single-click = jump
-                          onContextMenu={(e) => {                          // right-click = clear
-                            e.preventDefault(); // prevent browser menu
+                          onDoubleClick={() => setCuePoint(deck, index)}
+                          onClick={() => jumpToCuePoint(deck, index)}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
                             clearCuePoint(deck, index);
                           }}
                           title={`Cue ${index+1}: ${cuePoints[deck][index] !== null ? cuePoints[deck][index].toFixed(1) + 's' : 'Not set'}\nDouble-click to set\nClick to jump\nRight-click to clear`}
@@ -500,6 +475,18 @@
                           {cuePoints[deck][index] !== null ? index + 1 : "–"}
                         </button>
                       ))}
+                    </div>
+                    {/* URL Input + Load button per deck */}
+                    <div className="url-input-container">
+                      <input
+                        type="text"
+                        placeholder={`YouTube URL/ID for ${deck}`}
+                        value={videoIds[deck]}
+                        onChange={(e) =>
+                          setVideoIds((prev) => ({ ...prev, [deck]: e.target.value }))
+                        }
+                      />
+                      <button onClick={() => loadVideo(deck)}>Load {deck}</button>
                     </div>
                   </div>
                   <div className="fader">
@@ -531,7 +518,7 @@
             </div>
 
             <div className="crossfader">
-              <label>Crossfader (A/B ⇄ C/D)</label>
+              <label>(A/B ⇄ C/D)</label>
               <input
                 type="range"
                 min="0"
@@ -541,23 +528,9 @@
                 onChange={(e) => handleCrossfade(Number(e.target.value))}
               />
             </div>
-
-            <div className="searchload">
-              {["A", "B", "C", "D"].map((deck) => (
-                <div key={deck} className="url-input-container">
-                  <input
-                    type="text"
-                    placeholder={`YouTube URL/ID for ${deck}`}
-                    value={videoIds[deck]}
-                    onChange={(e) =>
-                      setVideoIds((prev) => ({ ...prev, [deck]: e.target.value }))
-                    }
-                  />
-                  <button onClick={() => loadVideo(deck)}>Load {deck}</button>
-                </div>
-              ))}
-            </div>
             
+            {/* removed bottom searchload duplication */}
+
             <div className="shortcuts-help">
               <p>Keyboard Shortcuts: Q/W/E/R to set cue points, A/S/D/F to jump to cue points</p>
             </div>
