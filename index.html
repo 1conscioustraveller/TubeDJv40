@@ -208,27 +208,27 @@
       }
       .url-input-container {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
       }
       input[type="text"] {
-        width: 180px;
+        width: 150px;
         padding: 8px;
         background: #001a3a;
         border: 1px solid #00bcd4;
         border-radius: 4px;
         color: white;
-        margin-bottom: 8px;
+        margin-bottom: 0px;
       }
       button {
-        padding: 8px 16px;
+        padding: 10px 10px;
         background: #00bcd4;
         color: #0a2a66;
         border: none;
         border-radius: 5px;
         cursor: pointer;
         font-weight: bold;
-        width: 100%;
+        width: 28%;
       }
       button:hover {
         background: #00e0ff;
@@ -309,6 +309,10 @@
         .cue-button {
           width: 35px;
           height: 35px;
+        }
+        .url-input-container {
+         flex-direction: column; /* Stack vertically on mobile */
+            gap: 5px; /* Add spacing between stacked elements */
         }
       }
     </style>
