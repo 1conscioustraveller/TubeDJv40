@@ -317,7 +317,13 @@
         const playersRef = React.useRef({});
         const [volumes, setVolumes] = React.useState({ A: 50, B: 50, C: 50, D: 50 });
         const [crossfade, setCrossfade] = React.useState(0.5);
-        const [videoIds, setVideoIds] = React.useState({ A: "", B: "", C: "", D: "" });
+        const [videoIds, setVideoIds] = React.useState({ 
+          A: "GSAYEAvkm5U", 
+          B: "HNmPXDsRPAg", 
+          C: "zJ2irSiM5dQ", 
+          D: "Tzs-cn0UlhA", 
+        });
+        
         const [rates, setRates] = React.useState({ A: 1, B: 1, C: 1, D: 1 });
         
         // Cue points (4 per deck)
@@ -340,7 +346,7 @@
               playersRef.current[id] = new window.YT.Player(`player-${id}`, {
                 height: "200",
                 width: "300",
-                videoId: "dQw4w9WgXcQ",
+                videoId: videoIds[id],
                 playerVars: { controls: 1 },
               });
             });
